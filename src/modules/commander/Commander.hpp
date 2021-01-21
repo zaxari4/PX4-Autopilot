@@ -126,6 +126,7 @@ private:
 
 	transition_result_t arm(arm_disarm_reason_t calling_reason, bool run_preflight_checks = true);
 	transition_result_t disarm(arm_disarm_reason_t calling_reason);
+	transition_result_t try_mode_change(main_state_t desired_mode, const bool enable_fallback, const bool notify_user);
 
 	void battery_status_check();
 
@@ -173,14 +174,14 @@ private:
 
 	void UpdateEstimateValidity();
 
-	// Set the main system state based on RC and override device inputs
+	// Set the main system state based on RC/Joystick and override device inputs
 	transition_result_t set_main_state(bool *changed);
 
 	// Enable override (manual reversion mode) on the system
 	transition_result_t set_main_state_override_on(bool *changed);
 
-	// Set the system main state based on the current RC inputs
-	transition_result_t set_main_state_rc();
+	// Set the system main state based on the current controller (Joystick/RC) state
+	transition_result_t set_main_state_from_controller();
 
 	bool shutdown_if_allowed();
 
@@ -371,6 +372,8 @@ private:
 	uint8_t		_last_manual_control_switches_arm_switch{manual_control_switches_s::SWITCH_POS_NONE};
 	uint32_t	_stick_off_counter{0};
 	uint32_t	_stick_on_counter{0};
+	bool 		_controller_is_a_joystick{false};
+	bool 		_user_changed_mode{false};
 
 	hrt_abstime	_boot_timestamp{0};
 	hrt_abstime	_last_disarmed_timestamp{0};
