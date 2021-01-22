@@ -2416,9 +2416,9 @@ Commander::run()
 
 			_last_manual_control_switches_arm_switch = _manual_control_switches.arm_switch;
 
-			_controller_is_a_joystick = _manual_control_setpoint.data_source > manual_control_setpoint_s::SOURCE_RC;
+			const bool controller_is_a_joystick = _manual_control_setpoint.data_source > manual_control_setpoint_s::SOURCE_RC;
 
-			if (_manual_control_switches_sub.update(&_manual_control_switches) || safety_updated || _controller_is_a_joystick) {
+			if (_manual_control_switches_sub.update(&_manual_control_switches) || safety_updated || controller_is_a_joystick) {
 
 				// handle landing gear switch if configured and in a manual mode
 				if ((_vehicle_control_mode.flag_control_manual_enabled) &&
@@ -3047,9 +3047,10 @@ Commander::set_main_state_override_on(bool *changed)
 transition_result_t
 Commander::set_main_state_from_controller()
 {
+	const bool controller_is_a_joystick = _manual_control_setpoint.data_source > manual_control_setpoint_s::SOURCE_RC;
 
-	if (!_controller_is_a_joystick && ((_manual_control_switches.timestamp == 0)
-					   || (_manual_control_switches.timestamp == _last_manual_control_switches.timestamp))) {
+	if (!controller_is_a_joystick && ((_manual_control_switches.timestamp == 0)
+					  || (_manual_control_switches.timestamp == _last_manual_control_switches.timestamp))) {
 
 		// no manual control or no update -> nothing changed
 		return TRANSITION_NOT_CHANGED;
@@ -3076,7 +3077,7 @@ Commander::set_main_state_from_controller()
 
 	if (_status.arming_state == vehicle_status_s::ARMING_STATE_ARMED) {
 		// if already armed don't evaluate first time RC
-		if (!_controller_is_a_joystick && (_last_manual_control_switches.timestamp == 0)) {
+		if (!controller_is_a_joystick && (_last_manual_control_switches.timestamp == 0)) {
 			should_evaluate_rc_mode_switch = false;
 			_last_manual_control_switches = _manual_control_switches;
 		}
@@ -3094,7 +3095,7 @@ Commander::set_main_state_from_controller()
 			// The attempt to switch to Position should only occur while the vehicle is disarmed and the user did not explicity command
 			// a different flight mode.
 
-			if (_controller_is_a_joystick) {
+			if (controller_is_a_joystick) {
 				should_initialize_mode_joystick = !_user_changed_mode
 								  && !(_internal_state.main_state == commander_state_s::MAIN_STATE_POSCTL);
 

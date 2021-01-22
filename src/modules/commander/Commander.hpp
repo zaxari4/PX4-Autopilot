@@ -372,7 +372,6 @@ private:
 	uint8_t		_last_manual_control_switches_arm_switch{manual_control_switches_s::SWITCH_POS_NONE};
 	uint32_t	_stick_off_counter{0};
 	uint32_t	_stick_on_counter{0};
-	bool 		_controller_is_a_joystick{false};
 	bool 		_user_changed_mode{false};
 
 	hrt_abstime	_boot_timestamp{0};
