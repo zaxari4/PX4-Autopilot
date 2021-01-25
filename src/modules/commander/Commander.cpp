@@ -2416,9 +2416,7 @@ Commander::run()
 
 			_last_manual_control_switches_arm_switch = _manual_control_switches.arm_switch;
 
-			const bool controller_is_a_joystick = _manual_control_setpoint.data_source > manual_control_setpoint_s::SOURCE_RC;
-
-			if (_manual_control_switches_sub.update(&_manual_control_switches) || safety_updated || controller_is_a_joystick) {
+			if (_manual_control_switches_sub.update(&_manual_control_switches) || safety_updated) {
 
 				// handle landing gear switch if configured and in a manual mode
 				if ((_vehicle_control_mode.flag_control_manual_enabled) &&
@@ -3030,7 +3028,7 @@ Commander::set_main_state(bool *changed)
 		return set_main_state_override_on(changed);
 
 	} else {
-		return set_main_state_from_controller();
+		return set_main_state_rc();
 	}
 }
 
@@ -3045,12 +3043,10 @@ Commander::set_main_state_override_on(bool *changed)
 }
 
 transition_result_t
-Commander::set_main_state_from_controller()
+Commander::set_main_state_rc()
 {
-	const bool controller_is_a_joystick = _manual_control_setpoint.data_source > manual_control_setpoint_s::SOURCE_RC;
-
-	if (!controller_is_a_joystick && ((_manual_control_switches.timestamp == 0)
-					  || (_manual_control_switches.timestamp == _last_manual_control_switches.timestamp))) {
+	if ((_manual_control_switches.timestamp == 0)
+	    || (_manual_control_switches.timestamp == _last_manual_control_switches.timestamp)) {
 
 		// no manual control or no update -> nothing changed
 		return TRANSITION_NOT_CHANGED;
@@ -3073,55 +3069,31 @@ Commander::set_main_state_from_controller()
 		|| (_last_manual_control_switches.stab_switch != _manual_control_switches.stab_switch)
 		|| (_last_manual_control_switches.man_switch != _manual_control_switches.man_switch);
 
-	bool should_initialize_mode_joystick = false;
 
 	if (_status.arming_state == vehicle_status_s::ARMING_STATE_ARMED) {
 		// if already armed don't evaluate first time RC
-		if (!controller_is_a_joystick && (_last_manual_control_switches.timestamp == 0)) {
+		if (_last_manual_control_switches.timestamp == 0) {
 			should_evaluate_rc_mode_switch = false;
 			_last_manual_control_switches = _manual_control_switches;
 		}
 
 	} else {
 		// not armed
-		const bool altitude_got_valid = (!_last_condition_local_altitude_valid && _status_flags.condition_local_altitude_valid);
-		const bool lpos_got_valid = (!_last_condition_local_position_valid && _status_flags.condition_local_position_valid);
-		const bool gpos_got_valid = (!_last_condition_global_position_valid && _status_flags.condition_global_position_valid);
+		if (!should_evaluate_rc_mode_switch) {
+			// to respect initial switch position (eg POSCTL) force RC switch re-evaluation if estimates become valid
+			const bool altitude_got_valid = (!_last_condition_local_altitude_valid && _status_flags.condition_local_altitude_valid);
+			const bool lpos_got_valid = (!_last_condition_local_position_valid && _status_flags.condition_local_position_valid);
+			const bool gpos_got_valid = (!_last_condition_global_position_valid && _status_flags.condition_global_position_valid);
 
-		if (altitude_got_valid || lpos_got_valid || gpos_got_valid) {
-
-			// Joysticks that use MAVLink commands assigned to buttons do not have an initial mode.
-			// To avoid having the vehicle initialized to manual, we try to initialize the system to Position.
-			// The attempt to switch to Position should only occur while the vehicle is disarmed and the user did not explicity command
-			// a different flight mode.
-
-			if (controller_is_a_joystick) {
-				should_initialize_mode_joystick = !_user_changed_mode
-								  && !(_internal_state.main_state == commander_state_s::MAIN_STATE_POSCTL);
-
-			} else {
-				if (!should_evaluate_rc_mode_switch) {
-					// to respect initial switch position (eg POSCTL) force RC switch re-evaluation if estimates become valid
-					should_evaluate_rc_mode_switch = true;
-				}
+			if (altitude_got_valid || lpos_got_valid || gpos_got_valid) {
+				should_evaluate_rc_mode_switch = true;
 			}
 		}
-
-	}
-
-	/* set main state according to RC switches or initialize mode for vehicles that rely on a joystick */
-	transition_result_t res = TRANSITION_NOT_CHANGED;
-
-	if (should_initialize_mode_joystick) {
-		reset_posvel_validity();
-		res = try_mode_change(commander_state_s::MAIN_STATE_POSCTL, true, false);
-		return res;
-
 	}
 
 	if (!should_evaluate_rc_mode_switch) {
 		/* no timestamp change or no switch change -> nothing changed */
-		return res;
+		return TRANSITION_NOT_CHANGED;
 	}
 
 	_last_manual_control_switches = _manual_control_switches;
@@ -3130,6 +3102,8 @@ Commander::set_main_state_from_controller()
 	// the desired mode
 	reset_posvel_validity();
 
+	/* set main state according to RC switches */
+	transition_result_t res = TRANSITION_NOT_CHANGED;
 
 	/* offboard switch overrides main switch */
 	if (_manual_control_switches.offboard_switch == manual_control_switches_s::SWITCH_POS_ON) {
