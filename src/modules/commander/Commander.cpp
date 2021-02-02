@@ -836,11 +836,6 @@ Commander::handle_command(const vehicle_command_s &cmd)
 			if ((arming_ret != TRANSITION_DENIED) && (main_ret != TRANSITION_DENIED)) {
 				cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
 
-				if (main_ret == TRANSITION_CHANGED) {
-					_user_changed_mode = true;
-
-				}
-
 			} else {
 				cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED;
 
