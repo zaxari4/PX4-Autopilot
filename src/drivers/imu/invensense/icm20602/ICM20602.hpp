@@ -101,6 +101,8 @@ private:
 
 	bool Reset();
 
+	bool StoreCheckedRegisterValue(Register reg);
+
 	bool Configure();
 	void ConfigureAccel();
 	void ConfigureGyro();
@@ -158,7 +160,7 @@ private:
 	uint32_t _fifo_gyro_samples{static_cast<uint32_t>(_fifo_empty_interval_us / (1000000 / GYRO_RATE))};
 
 	uint8_t _checked_register{0};
-	static constexpr uint8_t size_register_cfg{12};
+	static constexpr uint8_t size_register_cfg{18};
 	register_config_t _register_cfg[size_register_cfg] {
 		// Register               | Set bits, Clear bits
 		{ Register::CONFIG,        CONFIG_BIT::FIFO_MODE | CONFIG_BIT::DLPF_CFG_BYPASS_DLPF_8KHZ, 0 },
@@ -173,5 +175,11 @@ private:
 		{ Register::USER_CTRL,     USER_CTRL_BIT::FIFO_EN, 0 },
 		{ Register::PWR_MGMT_1,    PWR_MGMT_1_BIT::CLKSEL_0, PWR_MGMT_1_BIT::SLEEP },
 		{ Register::I2C_IF,        I2C_IF_BIT::I2C_IF_DIS, 0 },
+		{ Register::XA_OFFSET_H,   0, 0 },
+		{ Register::XA_OFFSET_L,   0, 0 },
+		{ Register::YA_OFFSET_H,   0, 0 },
+		{ Register::YA_OFFSET_L,   0, 0 },
+		{ Register::ZA_OFFSET_H,   0, 0 },
+		{ Register::ZA_OFFSET_L,   0, 0 },
 	};
 };

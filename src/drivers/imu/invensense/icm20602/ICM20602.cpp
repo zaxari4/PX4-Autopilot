@@ -106,6 +106,30 @@ void ICM20602::print_status()
 	perf_print_counter(_drdy_missed_perf);
 }
 
+bool ICM20602::StoreCheckedRegisterValue(Register reg)
+{
+	// 3 retries
+	for (int i = 0; i < 3; i++) {
+		uint8_t read1 = RegisterRead(reg);
+		uint8_t read2 = RegisterRead(reg);
+
+		if (read1 == read2) {
+			for (auto &r : _register_cfg) {
+				if (r.reg == reg) {
+					r.set_bits = read1;
+					r.clear_bits = ~read1;
+					return true;
+				}
+			}
+
+		} else {
+			PX4_ERR("0x%02hhX read 1 != read 2 (0x%02hhX != 0x%02hhX)", static_cast<uint8_t>(reg), read1, read2);
+		}
+	}
+
+	return false;
+}
+
 int ICM20602::probe()
 {
 	const uint8_t whoami = RegisterRead(Register::WHO_AM_I);
@@ -139,6 +163,19 @@ void ICM20602::RunImpl()
 		if ((RegisterRead(Register::WHO_AM_I) == WHOAMI)
 		    && (RegisterRead(Register::PWR_MGMT_1) == 0x41)
 		    && (RegisterRead(Register::CONFIG) == 0x80)) {
+
+			PX4_INFO("XA_OFFSET_H = 0x%02hhX", RegisterRead(Register::XA_OFFSET_H));
+			PX4_INFO("XA_OFFSET_L = 0x%02hhX", RegisterRead(Register::XA_OFFSET_L));
+			PX4_INFO("YA_OFFSET_H = 0x%02hhX", RegisterRead(Register::YA_OFFSET_H));
+			PX4_INFO("YA_OFFSET_L = 0x%02hhX", RegisterRead(Register::YA_OFFSET_L));
+			PX4_INFO("ZA_OFFSET_H = 0x%02hhX", RegisterRead(Register::ZA_OFFSET_H));
+			PX4_INFO("ZA_OFFSET_L = 0x%02hhX", RegisterRead(Register::ZA_OFFSET_L));
+			StoreCheckedRegisterValue(Register::XA_OFFSET_H);
+			StoreCheckedRegisterValue(Register::XA_OFFSET_L);
+			StoreCheckedRegisterValue(Register::YA_OFFSET_H);
+			StoreCheckedRegisterValue(Register::YA_OFFSET_L);
+			StoreCheckedRegisterValue(Register::ZA_OFFSET_H);
+			StoreCheckedRegisterValue(Register::ZA_OFFSET_L);
 
 			// Disable I2C, wakeup, and reset digital signal path
 			RegisterWrite(Register::I2C_IF, I2C_IF_BIT::I2C_IF_DIS); // set immediately to prevent switching into I2C mode
@@ -373,6 +410,13 @@ void ICM20602::ConfigureFIFOWatermark(uint8_t samples)
 
 bool ICM20602::Configure()
 {
+	PX4_INFO("XA_OFFSET_H = 0x%02hhX", RegisterRead(Register::XA_OFFSET_H));
+	PX4_INFO("XA_OFFSET_L = 0x%02hhX", RegisterRead(Register::XA_OFFSET_L));
+	PX4_INFO("YA_OFFSET_H = 0x%02hhX", RegisterRead(Register::YA_OFFSET_H));
+	PX4_INFO("YA_OFFSET_L = 0x%02hhX", RegisterRead(Register::YA_OFFSET_L));
+	PX4_INFO("ZA_OFFSET_H = 0x%02hhX", RegisterRead(Register::ZA_OFFSET_H));
+	PX4_INFO("ZA_OFFSET_L = 0x%02hhX", RegisterRead(Register::ZA_OFFSET_L));
+
 	// first set and clear all configured register bits
 	for (const auto &reg_cfg : _register_cfg) {
 		RegisterSetAndClearBits(reg_cfg.reg, reg_cfg.set_bits, reg_cfg.clear_bits);
