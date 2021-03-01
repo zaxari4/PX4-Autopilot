@@ -298,11 +298,13 @@ void TECS::_update_throttle_setpoint(const float throttle_cruise)
 
 		if (STE_rate_setpoint >= 0) {
 			// throttle is between cruise and maximum
-			throttle_predicted = throttle_cruise + STE_rate_setpoint / _STE_rate_max * (_throttle_setpoint_max - throttle_cruise);
+			throttle_predicted = throttle_cruise + _STE_rate_ff * STE_rate_setpoint / _STE_rate_max *
+					     (_throttle_setpoint_max - throttle_cruise);
 
 		} else {
 			// throttle is between cruise and minimum
-			throttle_predicted = throttle_cruise + STE_rate_setpoint / _STE_rate_min * (_throttle_setpoint_min - throttle_cruise);
+			throttle_predicted = throttle_cruise + _STE_rate_ff * STE_rate_setpoint / _STE_rate_min *
+					     (_throttle_setpoint_min - throttle_cruise);
 
 		}
 
@@ -436,7 +438,8 @@ void TECS::_update_pitch_setpoint()
 	}
 
 	// Calculate a specific energy correction that doesn't include the integrator contribution
-	float SEB_rate_correction = _SEB_rate_error * _pitch_damping_gain + _pitch_integ_state + SEB_rate_setpoint;
+	float SEB_rate_correction = _SEB_rate_error * _pitch_damping_gain + _pitch_integ_state + _SEB_rate_ff *
+				    SEB_rate_setpoint;
 
 	// During climbout, bias the demanded pitch angle so that a zero speed error produces a pitch angle
 	// demand equal to the minimum pitch angle set by the mission plan. This prevents the integrator
