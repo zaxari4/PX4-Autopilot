@@ -404,7 +404,6 @@ PARAM_DEFINE_INT32(COM_OBL_RC_ACT, 0);
  * @value 6 Acro
  * @value 7 Offboard
  * @value 8 Stabilized
- * @value 9 Rattitude
  * @value 12 Follow Me
  * @group Commander
  */
@@ -428,7 +427,6 @@ PARAM_DEFINE_INT32(COM_FLTMODE1, -1);
  * @value 6 Acro
  * @value 7 Offboard
  * @value 8 Stabilized
- * @value 9 Rattitude
  * @value 12 Follow Me
  * @group Commander
  */
@@ -452,7 +450,6 @@ PARAM_DEFINE_INT32(COM_FLTMODE2, -1);
  * @value 6 Acro
  * @value 7 Offboard
  * @value 8 Stabilized
- * @value 9 Rattitude
  * @value 12 Follow Me
  * @group Commander
  */
@@ -476,7 +473,6 @@ PARAM_DEFINE_INT32(COM_FLTMODE3, -1);
  * @value 6 Acro
  * @value 7 Offboard
  * @value 8 Stabilized
- * @value 9 Rattitude
  * @value 12 Follow Me
  * @group Commander
  */
@@ -500,7 +496,6 @@ PARAM_DEFINE_INT32(COM_FLTMODE4, -1);
  * @value 6 Acro
  * @value 7 Offboard
  * @value 8 Stabilized
- * @value 9 Rattitude
  * @value 12 Follow Me
  * @group Commander
  */
@@ -524,7 +519,6 @@ PARAM_DEFINE_INT32(COM_FLTMODE5, -1);
  * @value 6 Acro
  * @value 7 Offboard
  * @value 8 Stabilized
- * @value 9 Rattitude
  * @value 12 Follow Me
  * @group Commander
  */
@@ -964,7 +958,7 @@ PARAM_DEFINE_INT32(COM_POWER_COUNT, 1);
  *
  * A non-zero, positive value specifies the timeframe in seconds within failure detector is allowed to put the vehicle into
  * a lockdown state if attitude exceeds the limits defined in FD_FAIL_P and FD_FAIL_R.
- * The check is not executed for flight modes that do support acrobatic maneuvers, e.g: Acro (MC/FW), Rattitude and Manual (FW).
+ * The check is not executed for flight modes that do support acrobatic maneuvers, e.g: Acro (MC/FW) and Manual (FW).
  * A zero or negative value means that the check is disabled.
  *
  * @group Commander
