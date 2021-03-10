@@ -69,3 +69,9 @@ mc_pos_control start
 # Start Multicopter Land Detector.
 #
 land_detector start multicopter
+
+
+#
+# Start Multicopter Sprayer Example
+#
+sprayer_example start
