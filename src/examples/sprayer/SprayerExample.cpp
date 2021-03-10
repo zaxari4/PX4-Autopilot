@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2020 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2021 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,19 +63,10 @@ void SprayerExample::Run() {
     perf_begin(_loop_perf);
     perf_count(_loop_interval_perf);
 
-
-    // DO WORK
-
-
-    // Example
-    // grab latest gyroscope data
-    _sensor_gyro_sub.update();
-    const sensor_gyro_s &gyro = _sensor_gyro_sub.get();
-    PX4_INFO("Gyro x,y,z: \t%8.4f\t%8.4f\t%8.4f\n", (double) gyro.x, (double) gyro.y, (double) gyro.z);
-
-    _airspeed_validated_sub.update();
-    const airspeed_validated_s &airspeed_validated = _airspeed_validated_sub.get();
-    PX4_INFO("Airspeed validated groundspeed: \t%8.4f\n", (double) airspeed_validated.true_ground_minus_wind_m_s);
+    _vehicle_attitude_sub.update();
+    const vehicle_attitude_s &vehicle_attitude = _vehicle_attitude_sub.get();
+    PX4_INFO("Vehicle attitude q: \t%8.4f\t%8.4f\t%8.4f\t%8.4f\n", (double) vehicle_attitude.q[0],
+             (double) vehicle_attitude.q[1], (double) vehicle_attitude.q[2], (double) vehicle_attitude.q[3]);
 
     _vehicle_local_position_sub.update();
     const vehicle_local_position_s &vehicle_local_position = _vehicle_local_position_sub.get();
@@ -88,7 +79,7 @@ void SprayerExample::Run() {
     // publish some data
     orb_test_s data{};
     data.timestamp = hrt_absolute_time();
-    data.val = gyro.device_id;
+    data.val = groundspeed;
     _orb_test_pub.publish(data);
 
 

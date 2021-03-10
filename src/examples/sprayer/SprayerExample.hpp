@@ -40,8 +40,7 @@
 #include <px4_platform_common/posix.h>
 #include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 #include <uORB/topics/orb_test.h>
-#include <uORB/topics/sensor_gyro.h>
-#include <uORB/topics/airspeed_validated.h>
+#include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/Publication.hpp>
 #include <uORB/Subscription.hpp>
@@ -71,8 +70,8 @@ private:
 
     uORB::Publication<orb_test_s> _orb_test_pub{ORB_ID(orb_test)};
 
-    uORB::SubscriptionData<sensor_gyro_s> _sensor_gyro_sub{ORB_ID(sensor_gyro)};
-    uORB::SubscriptionData<airspeed_validated_s> _airspeed_validated_sub{ORB_ID(airspeed_validated)};
+    //uORB::SubscriptionData<sensor_gyro_s> _sensor_gyro_sub{ORB_ID(sensor_gyro)};
+    uORB::SubscriptionData<vehicle_attitude_s> _vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
     uORB::SubscriptionData<vehicle_local_position_s> _vehicle_local_position_sub{ORB_ID(vehicle_local_position)};
 
     perf_counter_t _loop_perf{perf_alloc(PC_ELAPSED, MODULE_NAME": cycle")};
